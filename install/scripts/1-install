@@ -180,6 +180,14 @@ create_sdcard_img()
 	dialog --ok-label Reboot --msgbox "\n $msg." 7 47
 }
 
+use_sdb_as_sdcard()
+{
+	[ -n "menulst" ] && sed -i "s|\(SDCARD=\S\+\?\s*\)||; s|\(SRC=\S\+\?\s*\)|\1 SDCARD=sdb|" $menulst
+	msg="Andorid will use sdb as the SD card"
+	cd /
+	dialog --ok-label Reboot --msgbox "\n $msg." 7 47
+}
+
 install_to()
 {
 	cd /
@@ -283,7 +291,7 @@ do_install()
 	[ -n "$VESA" ] || runit="Run Android-x86"
 	dialog --clear --title ' Congratulations! ' \
 		--menu "\n Android-x86 is installed successfully.\n " 12 51 13 \
-		"$runit" "" "Create a fake SD card" "" "Reboot" "" 2> $tempfile
+		"$runit" "" "Use sdb as a SD card" "" "Create a fake SD card" "" "Reboot" "" 2> $tempfile
 	case "`cat $tempfile`" in
 		Run*)
 			cd /android
@@ -300,6 +308,10 @@ do_install()
 			elif [ -e /hd/$asrc/data.img ]; then
 				mount -o loop /hd/$asrc/data.img data
 			fi
+			;;
+		Use*)
+			use_sdb_as_sdcard
+			rebooting
 			;;
 		Create*)
 			create_sdcard_img
